@@ -240,10 +240,8 @@ func CloseDB(chain *blockchain.BlockChain) {
 func monitorBlocksInTransit(chain *blockchain.BlockChain) {
 	mu.Lock()
 	defer mu.Unlock()
-	fmt.Println("aaaaaaaaaaaaaaaaaaaaaa")
 	isSync = true
 	syncChan <- true
-	fmt.Println("bbbbbbbbbbbbbbbbbbbbbb")
 
 	blockchain.SortBlocksByHeight(blocksInTransit)
 
