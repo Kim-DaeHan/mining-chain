@@ -1,0 +1,7 @@
+{
+  "chainId": 3002,
+  "port": 3002,
+  "rpcPort": 9522,
+  "nodeType": "cn",
+  "mining": true
+}
