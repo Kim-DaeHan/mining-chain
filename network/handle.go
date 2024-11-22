@@ -42,8 +42,8 @@ func HandleBlockList(request []byte, chain *blockchain.BlockChain) {
 
 	if len(tempBlockList) == payload.Length {
 		tempBlockList = nil
-		newBlockListChan <- true
 		isAppendBlockList = false
+		newBlockListChan <- true
 	}
 
 	SyncKnownNodes(payload.AddrFrom)
