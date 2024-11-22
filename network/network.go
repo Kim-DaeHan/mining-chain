@@ -315,26 +315,26 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 		case <-newBlockListChan:
 			// 새 블록 알림 수신 시 기존 mining 중단
 			cancel()
+			ctx, cancel = context.WithCancel(context.Background())
 
 			// 새 블록 알림 수신 시 즉시 blocksInTransit 확인 및 add 블록 작업
 			monitorBlocksInTransit(chain)
 
 			// // 새로운 컨텍스트 생성 및 mining 재시작
-			ctx, cancel = context.WithCancel(context.Background())
 
 			if !isSync && len(chain.LastHash) > 0 {
 				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
 			}
 
 		case newBlock := <-newBlockChan:
+			// 기존 mining 중단 및 재시작
+			cancel()
+			ctx, cancel = context.WithCancel(context.Background())
+
 			chain.Mu.Lock()
 			chain.AddBlock(newBlock)
 			chain.Mu.Unlock()
 			fmt.Println("Updated main block for mining:", newBlock.Height)
-
-			// 기존 mining 중단 및 재시작
-			cancel()
-			ctx, cancel = context.WithCancel(context.Background())
 
 			if !isSync && len(chain.LastHash) > 0 {
 				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
