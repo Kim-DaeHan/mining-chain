@@ -32,9 +32,24 @@ func HandleBlockList(request []byte, chain *blockchain.BlockChain) {
 	// 낮은 높이부터 순서대로 blocksInTransit에 블록을 추가
 	for _, blockData := range payload.Blocks {
 		block := blockchain.Deserialize(blockData)
-		blocksInTransit = append(blocksInTransit, block) // blocksInTransit에 추가
-		tempBlockList = append(tempBlockList, block)
-		fmt.Printf("Added block %x at height %d to blocksInTransit\n", block.Hash, block.Height)
+
+		// block.Hash가 blocksInTransit에 이미 존재하는지 확인
+		isDuplicate := false
+		for _, existingBlock := range blocksInTransit {
+			if bytes.Equal(existingBlock.Hash, block.Hash) {
+				isDuplicate = true
+				break
+			}
+		}
+
+		// 중복되지 않으면 blocksInTransit에 추가
+		if !isDuplicate {
+			blocksInTransit = append(blocksInTransit, block)
+			tempBlockList = append(tempBlockList, block)
+			fmt.Printf("Added block %x at height %d to blocksInTransit\n", block.Hash, block.Height)
+		} else {
+			fmt.Printf("Block %x at height %d is a duplicate and was not added\n", block.Hash, block.Height)
+		}
 	}
 
 	// 모든 블록이 체인에 추가되었다는 메시지 출력
