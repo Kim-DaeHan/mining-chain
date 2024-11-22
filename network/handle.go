@@ -106,28 +106,21 @@ func HandleBlock(request []byte, chain *blockchain.BlockChain) {
 	blockData := payload.Block
 	block := blockchain.Deserialize(blockData)
 
-	if isSync {
+	if chain.CurrentBlock != nil {
+		blockHeight = chain.CurrentBlock.Height + 1
+	} else {
+		blockHeight = 0
+	}
+
+	if block.Height > blockHeight {
+		otherHeight := block.Height
+		SyncWithLongestChain(chain, otherHeight, payload.AddrFrom)
+	} else {
 		isSync = true
 		syncChan <- true
 		blocksInTransit = append(blocksInTransit, block)
 		if !isAppendBlockList {
 			newBlockListChan <- true
-		}
-		fmt.Printf("동기화 중: 블록 높이: %d\n", block.Height)
-	} else {
-
-		if chain.CurrentBlock != nil {
-			blockHeight = chain.CurrentBlock.Height + 1
-		} else {
-			blockHeight = 0
-		}
-
-		if block.Height > blockHeight {
-			otherHeight := block.Height
-			SyncWithLongestChain(chain, otherHeight, payload.AddrFrom)
-		} else {
-			newBlockChan <- block
-			fmt.Printf("실시간 처리  ::: >>> 블록높이: %d, 해시: %x\n", block.Height, block.Hash)
 		}
 	}
 

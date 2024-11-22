@@ -33,8 +33,7 @@ var (
 	blocksInTransit  []*blockchain.Block // []Block 타입으로 선언
 	tempBlockList    []*blockchain.Block
 	globalChainId    string
-	// sync block
-	newBlockChan = make(chan *blockchain.Block)
+
 	// sync block list
 	newBlockListChan = make(chan bool) // blocksInTransit에 새 블록이 추가되면 알림
 	// mining block
@@ -326,19 +325,6 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
 			}
 
-		case newBlock := <-newBlockChan:
-			// 기존 mining 중단 및 재시작
-			cancel()
-			ctx, cancel = context.WithCancel(context.Background())
-
-			chain.Mu.Lock()
-			chain.AddBlock(newBlock)
-			chain.Mu.Unlock()
-			fmt.Println("Updated main block for mining:", newBlock.Height)
-
-			if !isSync && len(chain.LastHash) > 0 {
-				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
-			}
 		}
 
 	}
