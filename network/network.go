@@ -15,7 +15,6 @@ import (
 	"github.com/Kim-DaeHan/mining-chain/blockchain"
 	"github.com/Kim-DaeHan/mining-chain/config"
 	"github.com/Kim-DaeHan/mining-chain/mining"
-
 	"github.com/syndtr/goleveldb/leveldb"
 
 	"github.com/vrecan/death/v3"
@@ -251,7 +250,6 @@ func monitorBlocksInTransit(chain *blockchain.BlockChain) {
 		fmt.Printf("블록 추가 작업 중... 블록높이: %d, 해시: %x\n", block.Height, block.Hash)
 
 		chain.Mu.Lock()
-		chain.CurrentBlock = block
 
 		blockHeight := block.Height
 		blockHash := block.Hash
@@ -270,6 +268,7 @@ func monitorBlocksInTransit(chain *blockchain.BlockChain) {
 		} else {
 			chain.AddBlock(block)
 		}
+
 		chain.Mu.Unlock()
 	}
 
@@ -297,16 +296,15 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 
 			// 블록 전파
 			for _, node := range KnownNodes {
-				fmt.Println("블록 전파 node: ", node)
 				if node == nodeAddress {
 					continue
 				}
+				fmt.Println("블록 전파 node: ", node)
 				fmt.Println("Propagating block to node:", node)
 				SendBlock(node, miningBlock)
 			}
 
 			chain.Mu.Lock()
-			chain.CurrentBlock = miningBlock
 			chain.AddBlock(miningBlock)
 			chain.Mu.Unlock()
 
@@ -330,7 +328,6 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 
 		case newBlock := <-newBlockChan:
 			chain.Mu.Lock()
-			chain.CurrentBlock = newBlock
 			chain.AddBlock(newBlock)
 			chain.Mu.Unlock()
 			fmt.Println("Updated main block for mining:", newBlock.Height)

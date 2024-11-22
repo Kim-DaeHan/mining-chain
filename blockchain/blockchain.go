@@ -91,6 +91,7 @@ func (chain *BlockChain) AddBlock(block *Block) {
 	err = db.Write(batch, nil)
 	Handle(err)
 
+	chain.CurrentBlock = block
 	chain.LastHash = block.Hash
 }
 

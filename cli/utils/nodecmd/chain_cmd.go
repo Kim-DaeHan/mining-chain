@@ -70,7 +70,6 @@ var (
 			chain := blockchain.ContinueBlockChain(chainId)
 			defer chain.Database.Close()
 			block := blockchain.Genesis(validatorAddress)
-			chain.CurrentBlock = block
 			chain.AddBlock(block)
 			fmt.Println("Genesis block created")
 			return nil
