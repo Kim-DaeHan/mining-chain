@@ -239,7 +239,6 @@ func monitorBlocksInTransit(chain *blockchain.BlockChain) {
 	mu.Lock()
 	defer mu.Unlock()
 	isSync = true
-	syncChan <- true
 
 	blockchain.SortBlocksByHeight(blocksInTransit)
 
@@ -278,7 +277,7 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if !isSync && len(chain.LastHash) > 0 {
+	if len(chain.LastHash) > 0 {
 		// 초기 mining 시작
 		go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
 	}
@@ -307,21 +306,15 @@ func listenForNewBlocks(chain *blockchain.BlockChain) {
 			chain.AddBlock(miningBlock)
 			chain.Mu.Unlock()
 
-			if !isSync && len(chain.LastHash) > 0 {
+			if len(chain.LastHash) > 0 {
 				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
 			}
 
 		case <-newBlockListChan:
-			// 새 블록 알림 수신 시 기존 mining 중단
-			cancel()
-			ctx, cancel = context.WithCancel(context.Background())
-
 			// 새 블록 알림 수신 시 즉시 blocksInTransit 확인 및 add 블록 작업
 			monitorBlocksInTransit(chain)
 
-			// // 새로운 컨텍스트 생성 및 mining 재시작
-
-			if !isSync && len(chain.LastHash) > 0 {
+			if len(chain.LastHash) > 0 {
 				go mining.Run(ctx, chain, validatorAddress, miningBlockChan)
 			}
 

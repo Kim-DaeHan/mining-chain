@@ -119,6 +119,7 @@ func HandleBlock(request []byte, chain *blockchain.BlockChain) {
 		isSync = true
 		syncChan <- true
 		blocksInTransit = append(blocksInTransit, block)
+
 		if !isAppendBlockList {
 			newBlockListChan <- true
 		}
