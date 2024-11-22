@@ -116,9 +116,12 @@ func HandleBlock(request []byte, chain *blockchain.BlockChain) {
 		otherHeight := block.Height
 		SyncWithLongestChain(chain, otherHeight, payload.AddrFrom)
 	} else {
-		isSync = true
-		syncChan <- true
 		blocksInTransit = append(blocksInTransit, block)
+
+		if !isSync {
+			isSync = true
+			syncChan <- true
+		}
 
 		if !isAppendBlockList {
 			newBlockListChan <- true
@@ -158,7 +161,7 @@ func HandleLatestBlockHeight(request []byte, chain *blockchain.BlockChain) {
 	fmt.Printf("Sending blocks from height %d to %d to %s\n", startHeight, endHeight, payload.AddrFrom)
 
 	// 100개씩 나누어 SendBlockList 호출
-	batchSize := 100
+	batchSize := 1000
 	for i := 0; i < len(blocks); i += batchSize {
 		end := i + batchSize
 		if end > len(blocks) {
