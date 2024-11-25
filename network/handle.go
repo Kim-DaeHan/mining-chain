@@ -53,7 +53,7 @@ func HandleBlockList(request []byte, chain *blockchain.BlockChain) {
 	}
 
 	// 모든 블록이 체인에 추가되었다는 메시지 출력
-	fmt.Printf("현재 blocksInTransit :: > %d\n", len(blocksInTransit))
+	fmt.Println("blocksInTransit 에 리스트가 추가됨 길이는:: ", len(blocksInTransit))
 
 	if len(tempBlockList) == payload.Length {
 		tempBlockList = nil
@@ -118,6 +118,8 @@ func HandleBlock(request []byte, chain *blockchain.BlockChain) {
 	} else {
 		blocksInTransit = append(blocksInTransit, block)
 
+		fmt.Println("blocksInTransit 에 추가됨 길이는:: ", len(blocksInTransit))
+
 		if !isSync {
 			isSync = true
 			syncChan <- true
@@ -161,7 +163,7 @@ func HandleLatestBlockHeight(request []byte, chain *blockchain.BlockChain) {
 	fmt.Printf("Sending blocks from height %d to %d to %s\n", startHeight, endHeight, payload.AddrFrom)
 
 	// 100개씩 나누어 SendBlockList 호출
-	batchSize := 1000
+	batchSize := 100
 	for i := 0; i < len(blocks); i += batchSize {
 		end := i + batchSize
 		if end > len(blocks) {
