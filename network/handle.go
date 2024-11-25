@@ -112,8 +112,9 @@ func HandleBlock(request []byte, chain *blockchain.BlockChain) {
 		blockHeight = 0
 	}
 
-	if block.Height > blockHeight {
+	if !isSync && block.Height > blockHeight {
 		otherHeight := block.Height
+		fmt.Println("blocksInTransit 에 추가안됨 초기화")
 		SyncWithLongestChain(chain, otherHeight, payload.AddrFrom)
 	} else {
 		blocksInTransit = append(blocksInTransit, block)
